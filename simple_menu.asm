@@ -22,21 +22,21 @@ start:
     
   call render_menu
   
-poll_for_input:
-  mov dl,255
-  mov ah,06h              
-  int 21h                 
-  jnz handle_input
-  jmp poll_for_input
+wait_for_input:       
+  mov ah,0 
+  int 16h
+  
+  jmp handle_input
+  jmp wait_for_input
     
 handle_input:
-  cmp al,"s"
+  cmp ah,50h
   jz keydown
-  cmp al,'w'
+  cmp ah,48h
   jz keyup
-  cmp al,'e'
+  cmp ah,1ch
   call cs:exit_program
-  jmp poll_for_input
+  jmp wait_for_input
   
 keydown:
   call cs:increment_counter
@@ -49,7 +49,7 @@ keyup:
   
 rerender_menu:
   call render_menu
-  jmp poll_for_input
+  jmp wait_for_input
   
 render_menu proc 
   mov di,0 
