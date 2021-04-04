@@ -20,20 +20,7 @@ start:
   mov ax,0B800H 
   mov ES,ax 
     
-  mov di,0 
-  lea si,element1 
-  mov cx,8 
-  rep movsb
-  
-  mov di,160 
-  lea si,element2 
-  mov cx,8 
-  rep movsb
-
-  mov di,320 
-  lea si,element3 
-  mov cx,8
-  rep movsb
+  call render_menu
   
 poll_for_input:
   mov dl,255
@@ -54,12 +41,35 @@ handle_input:
 keydown:
   call cs:increment_counter
   call cs:rerender_cursor
-  jmp poll_for_input
+  jmp rerender_menu
   
 keyup:
   call cs:decrement_counter
   call cs:rerender_cursor
+  
+rerender_menu:
+  call render_menu
   jmp poll_for_input
+  
+render_menu proc 
+  mov di,0 
+  lea si,element1 
+  mov cx,8 
+  rep movsb
+  
+  mov di,160 
+  lea si,element2 
+  mov cx,8 
+  rep movsb
+
+  mov di,320 
+  lea si,element3 
+  mov cx,8
+  rep movsb
+  
+  call rerender_active_tab
+  ret 
+render_menu endp
 
 rerender_cursor proc 
   mov ah,02h
@@ -69,15 +79,46 @@ rerender_cursor proc
   ret 
 rerender_cursor endp
 
+rerender_active_tab proc 
+  cmp current_element,0
+  jz is_0
+  cmp current_element,1
+  jz is_1
+  jmp is_2
+  
+  is_0:
+    mov di,0 
+    lea si,element1_active 
+    mov cx,8 
+    rep movsb
+    jmp exit_proc
+    
+  is_1:
+    mov di,160 
+    lea si,element2_active 
+    mov cx,8 
+    rep movsb
+    jmp exit_proc
+    
+  is_2:
+    mov di,320 
+    lea si,element3_active 
+    mov cx,8 
+    rep movsb
+    
+  exit_proc:
+    ret 
+rerender_active_tab endp
+
 increment_counter proc 
-  cmp current_element,2
-  jz reset_counter_to_start
-  inc current_element
-  jmp fin2
-reset_counter_to_start:
-  mov current_element,0
-fin2:
-  ret
+    cmp current_element,2
+    jz reset_counter_to_start
+    inc current_element
+    jmp fin2
+  reset_counter_to_start:
+    mov current_element,0
+  fin2:
+    ret
 increment_counter endp
 
 decrement_counter proc 
