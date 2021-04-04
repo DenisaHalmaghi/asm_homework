@@ -47,7 +47,9 @@ handle_input:
   jz keydown
   cmp al,'w'
   jz keyup
-  jmp keyup
+  cmp al,'e'
+  call cs:exit_program
+  jmp poll_for_input
   
 keydown:
   call cs:increment_counter
@@ -59,7 +61,7 @@ keyup:
   call cs:rerender_cursor
   jmp poll_for_input
 
-rerender_cursor proc far
+rerender_cursor proc 
   mov ah,02h
   mov dh,current_element
   mov dl,0
@@ -67,7 +69,7 @@ rerender_cursor proc far
   ret 
 rerender_cursor endp
 
-increment_counter proc far
+increment_counter proc 
   cmp current_element,2
   jz reset_counter_to_start
   inc current_element
@@ -78,7 +80,7 @@ fin2:
   ret
 increment_counter endp
 
-decrement_counter proc far
+decrement_counter proc 
   cmp current_element,0
   jz reset_counter_to_end
   dec current_element
@@ -86,7 +88,16 @@ decrement_counter proc far
 reset_counter_to_end:
   mov current_element,2
 fin:
-   ret
+  ret
 decrement_counter endp
+
+exit_program proc 
+  cmp current_element,2
+  jnz return_from_proc
+  mov ah, 4CH
+  int 21H
+return_from_proc:
+  ret
+exit_program endp
   
 end start
